@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smartphone Simulator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .phone-container {
+            position: relative;
+            width: 350px;
+            height: 700px;
+            background-color: #111;
+            border-radius: 40px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        .screen {
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            border-radius: 25px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background-color: #111;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+        }
+
+        .status-bar {
+            height: 30px;
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 20px;
+            font-size: 12px;
+            color: #333;
+        }
+
+        .home-screen {
+            height: calc(100% - 60px);
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .app-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .app-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .app-icon-img {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background-color: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .app-icon-name {
+            font-size: 10px;
+            color: #333;
+            text-align: center;
+            word-break: break-word;
+            width: 100%;
+        }
+
+        .dock {
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 60px;
+            background-color: rgba(240, 240, 240, 0.8);
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .dock .app-icon-img {
+            width: 45px;
+            height: 45px;
+        }
+
+        .app-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .app-header {
+            height: 50px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            background-color: #f5f5f7;
+            border-bottom: 1px solid #e5e5ea;
+        }
+
+        .back-button {
+            font-size: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .app-title {
+            font-weight: 500;
+        }
+
+        .app-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        /* Phone App Styles */
+        .phone-app .dialer {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .dialer-button {
+            background-color: #f5f5f7;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 0 auto;
+            border: none;
+            font-size: 24px;
+        }
+
+        .dialer-button:active {
+            background-color: #e0e0e0;
+        }
+
+        .dialer-button span:last-child {
+            font-size: 10px;
+            margin-top: 3px;
+            color: #666;
+        }
+
+        .call-input {
+            width: 100%;
+            height: 50px;
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            border: none;
+            border-bottom: 1px solid #e5e5ea;
+            outline: none;
+        }
+
+        .call-button {
+            width: 70px;
+            height: 70px;
+            background-color: #30d158;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            margin: 0 auto;
+            border: none;
+            color: white;
+            font-size: 24px;
+        }
+
+        /* Messages App Styles */
+        .messages-app .conversation {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 60px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .received {
+            background-color: #f5f5f7;
+            align-self: flex-start;
+        }
+
+        .sent {
+            background-color: #007aff;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .message-input {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 30px);
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input input {
+            flex: 1;
+            height: 40px;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #e5e5ea;
+            outline: none;
+        }
+
+        .message-input button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #007aff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Camera App Styles */
+        .camera-app .viewport {
+            width: 100%;
+            height: calc(100% - 100px);
+            background-color: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .camera-app .controls {
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .capture-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: white;
+            border: 3px solid #666;
+            cursor: pointer;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            overflow-x: auto;
+            margin-bottom: 10px;
+        }
+
+        .filter {
+            width: 80px;
+            height: 100px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Calculator App Styles */
+        .calculator-display {
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding: 15px;
+        }
+
+        .calculation {
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .result {
+            font-size: 36px;
+            font-weight: 500;
+        }
+
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .calc-button {
+            height: 60px;
+            border-radius: 30px;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .calc-button.function {
+            background-color: #a5a5a5;
+        }
+
+        .calc-button.operator {
+            background-color: #ff9f0a;
+            color: white;
+        }
+
+        .calc-button.number {
+            background-color: #333;
+            color: white;
+        }
+
+        .calc-button.zero {
+            grid-column: span 2;
+        }
+
+        /* Settings App Styles */
+        .settings-list {
+            list-style: none;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #e5e5ea;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 30px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #34c759;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Music Player Styles */
+        .music-player .album-art {
+            width: 100%;
+            height: 300px;
+            background-color: #f5f5f7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .music-player .album-art img {
+            width: 250px;
+            height: 250px;
+            border-radius: 10px;
+        }
+
+        .song-info {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .song-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .artist-name {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 5px;
+            background-color: #e5e5ea;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            cursor: pointer;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #007aff;
+            border-radius: 3px;
+            width: 30%;
+        }
+
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .control-button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .play-button {
+            background-color: #007aff;
+            width: 60px;
+            height: 60px;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="screen">
+            <div class="notch"></div>
+            <div class="status-bar">
+                <span>9:41</span>
+                <span class="status-icons">
+                    <span>5G</span>
+                    <span style="margin-left: 5px;">100%</span>
+                </span>
+            </div>
+
+            <!-- Home Screen -->
+            <div class="home-screen" id="homeScreen">
+                <div class="app-icon" onclick="openApp('phoneApp')">
+                    <div class="app-icon-img" style="background-color: #3ccd00;">📞</div>
+                    <div class="app-icon-name">Phone</div>
+                </div>
+                <div class="app-icon" onclick="openApp('messagesApp')">
+                    <div class="app-icon-img" style="background-color: #36a8fd;">💬</div>
+                    <div class="app-icon-name">Messages</div>
+                </div>
+                <div class="app-icon" onclick="openApp('cameraApp')">
+                    <div class="app-icon-img" style="background-color: #25c3a7;">📷</div>
+                    <div class="app-icon-name">Camera</div>
+                </div>
+                <div class="app-icon" onclick="openApp('photosApp')">
+                    <div class="app-icon-img" style="background-color: #ff375f;">🖼️</div>
+                    <div class="app-icon-name">Photos</div>
+                </div>
+                <div class="app-icon" onclick="openApp('calculatorApp')">
+                    <div class="app-icon-img" style="background-color: #6c6c72;">🔢</div>
+                    <div class="app-icon-name">Calculator</div>
+                </div>
+                <div class="app-icon" onclick="openApp('settingsApp')">
+                    <div class="app-icon-img" style="background-color: #8a8a8e;">⚙️</div>
+                    <div class="app-icon-name">Settings</div>
+                </div>
+                <div class="app-icon" onclick="openApp('mapsApp')">
+                    <div class="app-icon-img" style="background-color: #76a8fa;">🗺️</div>
+                    <div class="app-icon-name">Maps</div>
+                </div>
+                <div class="app-icon" onclick="openApp('musicApp')">
+                    <div class="app-icon-img" style="background-color: #ff375f;">🎵</div>
+                    <div class="app-icon-name">Music</div>
+                </div>
+                <div class="app-icon" onclick="openApp('browserApp')">
+                    <div class="app-icon-img" style="background-color: #147efb;">🌐</div>
+                    <div class="app-icon-name">Browser</div>
+                </div>
+                <div class="app-icon" onclick="openApp('calendarApp')">
+                    <div class="app-icon-img" style="background-color: #ff9500;">📅</div>
+                    <div class="app-icon-name">Calendar</div>
+                </div>
+                <div class="app-icon" onclick="openApp('weatherApp')">
+                    <div class="app-icon-img" style="background-color: #1da1f2;">☀️</div>
+                    <div class="app-icon-name">Weather</div>
+                </div>
+                <div class="app-icon" onclick="openApp('notesApp')">
+                    <div class="app-icon-img" style="background-color: #ffcc00;">📝</div>
+                    <div class="app-icon-name">Notes</div>
+                </div>
+            </div>
+
+            <!-- Dock -->
+            <div class="dock">
+                <div class="app-icon" onclick="openApp('phoneApp')">
+                    <div class="app-icon-img" style="background-color: #3ccd00;">📞</div>
+                </div>
+                <div class="app-icon" onclick="openApp('messagesApp')">
+                    <div class="app-icon-img" style="background-color: #36a8fd;">💬</div>
+                </div>
+                <div class="app-icon" onclick="openApp('browserApp')">
+                    <div class="app-icon-img" style="background-color: #147efb;">🌐</div>
+                </div>
+                <div class="app-icon" onclick="openApp('musicApp')">
+                    <div class="app-icon-img" style="background-color: #ff375f;">🎵</div>
+                </div>
+            </div>
+
+            <!-- Phone App -->
+            <div class="app-screen" id="phoneApp">
+                <div class="app-header">
+                    <span class="back-button" onclick="closeApp('phoneApp')">←</span>
+                    <span class="app-title">Phone</span>
+                </div>
+                <div class="app-content phone-app">
+                    <input type="text" class="call-input" id="phoneNumber" placeholder="Enter number" readonly>
+                    <div class="dialer">
+                        <button class="dialer-button" onclick="addToPhoneNumber('1')"><span>1</span><span> </span></button>
+                        <button class="dialer-button" onclick="addToPhoneNumber('2')"><span>2</span><span>ABC</span></button>
+                        <button class="dialer-button" onclick="addToPhoneNumber('3')"><span>3</span><span>DEF</span></button>
+                        <button class="dialer-button" onclick="addToPhoneNumber('4')"><span>4</span><span>GHI</span></button>
+                        <button class="dialer-button" onclick="addToPhoneNumber('5')"><span>5</span><span>JKL</span></button>
+                        <button class="dialer-button" onclick="addToPhoneNumber('6')"><span>6</span><span>MNO</span></button>
+                        <button class="dialer-button" onclick="addToPhoneNumber('7')"><span>7</span><span>PQRS</span></button>
+                        <button class="dialer-button" onclick="addToPhoneNumber('8')"><span>8</span><span>TUV</span></button>
+                        <button class="dialer-button" onclick="addToPhoneNumber('9')"><span>9</span><span>WXYZ</span></button>
+                        <button class="dialer-button" onclick="addToPhoneNumber('*')"><span>*</span></button>
+                        <button class="dialer-button" onclick="addToPhoneNumber('0')"><span>0</span><span>+</span></button>
+                        <button class="dialer-button" onclick="addToPhoneNumber('#')"><span>#</span></button>
+                    </div>
+                    <button class="call-button" onclick="makeCall()">📞</button>
+                </div>
+            </div>
+
+            <!-- Messages App -->
+            <div class="app-screen" id="messagesApp">
+                <div class="app-header">
+                    <span class="back-button" onclick="closeApp('messagesApp')">←</span>
+                    <span class="app-title">Messages</span>
+                </div>
+                <div class="app-content messages-app">
+                    <div class="conversation" id="messageConversation">
+                        <div class="message received">Hey, how are you?</div>
+                        <div class="message sent">I'm doing great! How about you?</div>
+                        <div class="message received">Pretty good. Want to meet for coffee later?</div>
+                        <div class="message sent">Sounds good! How about 2pm at the usual place?</div>
+                    </div>
+                    <div class="message-input">
+                        <input type="text" id="newMessage" placeholder="Message">
+                        <button onclick="sendMessage()">↵</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Camera App -->
+            <div class="app-screen" id="cameraApp">
+                <div class="app-header">
+                    <span class="back-button" onclick="closeApp('cameraApp')">←</span>
+                    <span class="app-title">Camera</span>
+                </div>
+                <div class="app-content camera-app">
+                    <div class="filters">
+                        <div class="filter" style="background-color: #ff5e3a;"></div>
+                        <div class="filter" style="background-color: #5856d6;"></div>
+                        <div class="filter" style="background-color: #1abc9c;"></div>
+                        <div class="filter" style="background-color: #e84393;"></div>
+                        <div class="filter" style="background-color: #0984e3;"></div>
+                    </div>
+                    <div class="viewport">
+                        <img src="https://placehold.co/600x400" alt="Camera preview showing a deserted city street at dusk" id="cameraPreview">
+                    </div>
+                    <div class="controls">
+                        <button class="capture-button" onclick="takePhoto()"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calculator App -->
+            <div class="app-screen" id="calculatorApp">
+                <div class="app-header">
+                    <span class="back-button" onclick="closeApp('calculatorApp')">←</span>
+                    <span class="app-title">Calculator</span>
+                </div>
+                <div class="app-content calculator-app">
+                    <div class="calculator-display">
+                        <div class="calculation" id="calculation"></div>
+                        <div class="result" id="calculatorResult">0</div>
+                    </div>
+                    <div class="calculator-buttons">
+                        <button class="calc-button function" onclick="clearCalculator()">C</button>
+                        <button class="calc-button function" onclick="toggleSign()">+/-</button>
+                        <button class="calc-button function" onclick="percentage()">%</button>
+                        <button class="calc-button operator" onclick="operation('/')">÷</button>
+                        <button class="calc-button number" onclick="addNumber('7')">7</button>
+                        <button class="calc-button number" onclick="addNumber('8')">8</button>
+                        <button class="calc-button number" onclick="addNumber('9')">9</button>
+                        <button class="calc-button operator" onclick="operation('*')">×</button>
+                        <button class="calc-button number" onclick="addNumber('4')">4</button>
+                        <button class="calc-button number" onclick="addNumber('5')">5</button>
+                        <button class="calc-button number" onclick="addNumber('6')">6</button>
+                        <button class="calc-button operator" onclick="operation('-')">-</button>
+                        <button class="calc-button number" onclick="addNumber('1')">1</button>
+                        <button class="calc-button number" onclick="addNumber('2')">2</button>
+                        <button class="calc-button number" onclick="addNumber('3')">3</button>
+                        <button class="calc-button operator" onclick="operation('+')">+</button>
+                        <button class="calc-button number zero" onclick="addNumber('0')">0</button>
+                        <button class="calc-button number" onclick="addDecimal()">.</button>
+                        <button class="calc-button operator" onclick="calculate()">=</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings App -->
+            <div class="app-screen" id="settingsApp">
+                <div class="app-header">
+                    <span class="back-button" onclick="closeApp('settingsApp')">←</span>
+                    <span class="app-title">Settings</span>
+                </div>
+                <div class="app-content settings-app">
+                    <ul class="settings-list">
+                        <li class="setting-item">
+                            <div>Wi-Fi</div>
+                            <div>Connected</div>
+                        </li>
+                        <li class="setting-item">
+                            <div>Bluetooth</div>
+                            <label class="switch">
+                                <input type="checkbox" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </li>
+                        <li class="setting-item">
+                            <div>Airplane Mode</div>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </li>
+                        <li class="setting-item">
+                            <div>Notifications</div>
+                            <div>→</div>
+                        </li>
+                        <li class="setting-item">
+                            <div>Sounds & Haptics</div>
+                            <div>→</div>
+                        </li>
+                        <li class="setting-item">
+                            <div>Focus</div>
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider"></span>
+                            </label>
+                        </li>
+                        <li class="setting-item">
+                            <div>Screen Time</div>
+                            <div>→</div>
+                        </li>
+                        <li class="setting-item">
+                            <div>Wallpaper</div>
+                            <div>→</div>
+                        </li>
+                        <li class="setting-item">
+                            <div>Accessibility</div>
+                            <div>→</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Music App -->
+            <div class="app-screen" id="musicApp">
+                <div class="app-header">
+                    <span class="back-button" onclick="closeApp('musicApp')">←</span>
+                    <span class="app-title">Music</span>
+                </div>
+                <div class="app-content music-player">
+                    <div class="album-art">
+                        <img src="https://placehold.co/300x300" alt="Album cover for 'Midnight Dreams' featuring a neon-lit cityscape at night">
+                    </div>
+                    <div class="song-info">
+                        <div class="song-title">Midnight Dreams</div>
+                        <div class="artist-name">The Night Owls</div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar"></div>
+                    </div>
+                    <div class="time-info">
+                        <span>1:23</span>
+                        <span>3:45</span>
+                    </div>
+                    <div class="player-controls">
+                        <div class="control-button">⏮</div>
+                        <div class="control-button">⏯</div>
+                        <div class="control-button play-button">▶</div>
+                        <div class="control-button">⏭</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Browser App -->
+            <div class="app-screen" id="browserApp">
+                <div class="app-header">
+                    <span class="back-button" onclick="closeApp('browserApp')">←</span>
+                    <span class="app-title">Browser</span>
+                </div>
+                <div class="app-content" style="height: calc(100% - 50px); padding: 0;">
+                    <iframe src="about:blank" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App Navigation
+        function openApp(appId) {
+            document.getElementById('homeScreen').style.display = 'none';
+            document.getElementById(appId).style.display = 'flex';
+        }
+
+        function closeApp(appId) {
+            document.getElementById(appId).style.display = 'none';
+            document.getElementById('homeScreen').style.display = 'grid';
+        }
+
+        // Phone App Logic
+        function addToPhoneNumber(number) {
+            const phoneNumberInput = document.getElementById('phoneNumber');
+            phoneNumberInput.value += number;
+        }
+
+        function makeCall() {
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            if (phoneNumber) {
+                alert(`Calling ${phoneNumber}...`);
+                document.getElementById('phoneNumber').value = '';
+            }
+        }
+
+        // Messages App Logic
+        function sendMessage() {
+            const messageInput = document.getElementById('newMessage');
+            const message = messageInput.value.trim();
+            
+            if (message) {
+                const conversation = document.getElementById('messageConversation');
+                const newMessage = document.createElement('div');
+                newMessage.className = 'message sent';
+                newMessage.textContent = message;
+                conversation.appendChild(newMessage);
+                messageInput.value = '';
+                
+                // Auto-scroll to bottom
+                conversation.scrollTop = conversation.scrollHeight;
+                
+                // Simulate reply after 1 second
+                setTimeout(() => {
+                    const replies = [
+                        "Sounds good!",
+                        "I'll be there",
+                        "Thanks for letting me know",
+                        "See you then!",
+                        "👍"
+                    ];
+                    const reply = replies[Math.floor(Math.random() * replies.length)];
+                    
+                    const replyMessage = document.createElement('div');
+                    replyMessage.className = 'message received';
+                    replyMessage.textContent = reply;
+                    conversation.appendChild(replyMessage);
+                    
+                    // Auto-scroll to bottom again
+                    conversation.scrollTop = conversation.scrollHeight;
+                }, 1000);
+            }
+        }
+
+        // Calculator App Logic
+        let currentInput = '0';
+        let previousInput = '0';
+        let operationType = null;
+        let resetInput = false;
+
+        function updateCalculatorDisplay() {
+            document.getElementById('calculatorResult').textContent = currentInput;
+            document.getElementById('calculation').textContent = previousInput + (operationType ? ' ' + operationType : '');
+        }
+
+        function addNumber(number) {
+            if (currentInput === '0' || resetInput) {
+                currentInput = number;
+                resetInput = false;
+            } else {
+                currentInput += number;
+            }
+            updateCalculatorDisplay();
+        }
+
+        function addDecimal() {
+            if (!currentInput.includes('.')) {
+                currentInput += '.';
+                updateCalculatorDisplay();
+            }
+        }
+
+        function toggleSign() {
+            currentInput = (parseFloat(currentInput) * -1).toString();
+            updateCalculatorDisplay();
+        }
+
+        function percentage() {
+            currentInput = (parseFloat(currentInput) / 100).toString();
+            updateCalculatorDisplay();
+        }
+
+        function clearCalculator() {
+            currentInput = '0';
+            previousInput = '0';
+            operationType = null;
+            updateCalculatorDisplay();
+        }
+
+        function operation(op) {
+            if (operationType !== null) calculate();
+            previousInput = currentInput;
+            operationType = op;
+            resetInput = true;
+            updateCalculatorDisplay();
+        }
+
+        function calculate() {
+            if (operationType === null || resetInput) return;
+            
+            const prev = parseFloat(previousInput);
+            const current = parseFloat(currentInput);
+            let result = 0;
+            
+            switch (operationType) {
+                case '+':
+                    result = prev + current;
+                    break;
+                case '-':
+                    result = prev - current;
+                    break;
+                case '*':
+                    result = prev * current;
+                    break;
+                case '/':
+                    result = prev / current;
+                    break;
+            }
+            
+            currentInput = result.toString();
+            operationType = null;
+            resetInput = true;
+            updateCalculatorDisplay();
+        }
+
+        // Music Player Logic
+        document.querySelector('.play-button').addEventListener('click', function() {
+            this.textContent = this.textContent === '▶' ? '⏸' : '▶';
+        });
+
+        // Initialize calculator display
+        updateCalculatorDisplay();
+    </script>
+</body>
+</html>
